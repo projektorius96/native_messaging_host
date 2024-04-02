@@ -23,8 +23,10 @@ void main(List<String> arguments) {
     /* IGNORE */
 
     // DEV_NOTE # somewhy String.fromCharCodes forces Chrome to exit native messaging host with Error: Native host has exited.
-    sink.write( /* String.fromCharCodes( */ decodeMessage(data) /* ) */ ) ; /* [123, 34, 116, 101, 120, 116, 34, 58, 34, 72, 101, 108, 108, 111, 34, 125] */// yet in JavaScript String.fromCharCodes([123, 34, 116, 101, 120, 116, 34, 58, 34, 72, 101, 108, 108, 111, 34, 125]) returns expected "{text: 'Hello'}"
-    /* dart_io.stdout.write(encodeMessage( String.fromCharCodes( [123, 34, 116, 101, 120, 116, 34, 58, 34, 72, 101, 108, 108, 111, 34, 125] ) )); */// exits Native messaging host with Error: Native host has exited.
+  List<dynamic> charCodes = decodeMessage(data); // Example char codes
+  List<int> charCodesInt = charCodes.cast<int>();
+  sink.write( String.fromCharCodes( charCodesInt ) );
+  /* dart_io.stdout.write(encodeMessage( String.fromCharCodes( [123, 34, 116, 101, 120, 116, 34, 58, 34, 72, 101, 108, 108, 111, 34, 125] ) )); */// exits Native messaging host with Error: Native host has exited.
   });
 
   // Graceful termination on Ctrl+C (SIGINT), see [cont'd] below
