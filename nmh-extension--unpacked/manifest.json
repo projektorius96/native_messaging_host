@@ -1,0 +1,12 @@
+{
+    "name": "nmh",
+    "version": "0.0.1",
+    "manifest_version": 3,
+    "action": {
+        "default_title": "Click me"
+    },
+    "permissions": ["nativeMessaging"],
+    "background": {
+        "service_worker": "service-worker.js"
+    }
+}

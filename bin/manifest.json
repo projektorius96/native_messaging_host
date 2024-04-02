@@ -1,0 +1,7 @@
+{
+    "name": "com.my_company.my_application",
+    "description": "Native messaging host built for Chromium-based browsers, powered by Dart",
+    "path": "\\main.exe",
+    "type": "stdio",
+    "allowed_origins": ["chrome-extension://bghbeldakemidgebaoaklbgciemgfoab/"]
+}
