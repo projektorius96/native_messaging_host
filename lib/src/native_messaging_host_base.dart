@@ -11,13 +11,12 @@ printExact(s) {
 void initHost() {
   /// herein [data] comes from Chromium as an idiomatic encodeMessage(Uint32LE)
   dart_io.stdin.listen((data) {
-
     /* IGNORE */
-      /* dart_buffer.Uint8List d = data;
+    /* dart_buffer.Uint8List d = data;
       print(Stream.fromIterable(d)); */
     /* IGNORE */
 
-    final decodedMessage = decodeMessage(data/* encodeMessage(data) */);
+    final decodedMessage = decodeMessage(data /* encodeMessage(data) */);
 
     print(decodedMessage);
   });
@@ -37,26 +36,31 @@ void initHost() {
   // });
 }
 
-encodeMessage(message) {
-  // Encode the message to JSON string
-  final jsonString = dart_converter.jsonEncode(message);
+encodeMessage(mapLiteral) {
+  // Convert the map to a JSON string
+  String jsonMessage = dart_converter.jsonEncode(mapLiteral);
 
-  // hard-coded offset
-  final offset = 4;
+  // Get the length of the message in bytes
+  int messageLength = jsonMessage.length;
 
-  // Allocate a buffer with space for message length and data
-  final bufferLength = jsonString.length + offset;
-  final buffer = dart_buffer.Uint8List(bufferLength);
+  // Ensure the message does not exceed the maximum size
+  if (messageLength > 1048576) {
+    throw ArgumentError('Message exceeds maximum size of 1 MB');
+  }
 
-  // Explicitly write message length at idiomatic buffer[index:=0] with 32-bit host endian (most likely little endian)
-  buffer.buffer
-      .asByteData()
-      .setUint32(0, jsonString.length, dart_buffer.Endian.host);
+  // Convert the message length to bytes using native byte order (little-endian on Windows)
+  final lengthBytes = dart_buffer.ByteData(4);
+    lengthBytes.setInt32(0, messageLength, dart_buffer.Endian.host);
 
-  // Copy encoded data to the buffer
-  buffer.setAll(offset, jsonString.codeUnits);
+  // Convert the JSON message string to UTF-8 encoded bytes
+  List<int> utf8Bytes = dart_converter.utf8.encoder.convert(jsonMessage);
 
-  return buffer;
+  // Combine the length bytes and UTF-8 encoded message bytes
+  dart_buffer.Uint8List message = dart_buffer.Uint8List(4 + messageLength);
+    message.setRange(0, 4, lengthBytes.buffer.asUint8List());
+    message.setRange(4, 4 + messageLength, utf8Bytes);
+
+  return message;
 }
 
 decodeMessage(buffer) {
