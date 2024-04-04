@@ -1,9 +1,6 @@
 import 'dart:io' as dart_io;
 import 'dart:convert' as dart_convert;
-
 import 'package:native_messaging_host/src/native_messaging_host_base.dart';
-/* import 'dart:convert' as dart_converter; */
-/* import 'package:native_messaging_host/src/native_messaging_host_base.dart'; */
 
 void main(List<String> arguments) {
   // Define the path to the log file
@@ -26,12 +23,14 @@ void main(List<String> arguments) {
     // DEV_NOTE # somewhy String.fromCharCodes forces Chrome to exit native messaging host with Error: Native host has exited.
     List<dynamic> charCodes = decodeMessage(data); // Example char codes
     List<int> charCodesInt = charCodes.cast<int>();
-    sink.write(dart_convert.utf8.decode(charCodesInt));
-    Map decodedMessage =
-        dart_convert.json.decode(String.fromCharCodes(charCodesInt));
-    sink.write(decodedMessage["text"]);
-    dart_io.stdout.write( encodeMessage(decodedMessage) );
-    dart_io.stdout.flush();
+    // sink.write(dart_convert.utf8.decode(charCodesInt));
+    // OPTIONAL
+    // Map decodedMessage =
+    //     dart_convert.json.decode(String.fromCharCodes(charCodesInt));
+    // sink.write(decodedMessage["text"]);
+
+    /// DEV_NOTE # perhaps due to text_mode this makes NMH to crash
+    sink.write( Stream.fromIterable(encodeMessage('{"text":"Hello from NMH"}')) );
   });
 
   // Graceful termination on Ctrl+C (SIGINT), see [cont'd] below
