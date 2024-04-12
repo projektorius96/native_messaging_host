@@ -1,5 +1,4 @@
 import 'dart:io' as dart_io;
-import 'dart:convert' as dart_convert;
 import 'package:native_messaging_host/src/native_messaging_host_base.dart';
 
 void main(List<String> arguments) {
