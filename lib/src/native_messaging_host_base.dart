@@ -1,4 +1,3 @@
-/* import 'dart:io' as dart_io; */
 import 'dart:convert' as dart_convert;
 import 'dart:typed_data' as dart_buffer;
 
@@ -21,7 +20,7 @@ import 'dart:typed_data' as dart_buffer;
 
 encodeMessage(jsonString) {
   // Encode the JSON string to UTF-8
-  final encodedJson = dart_convert.utf8.encode(jsonString);
+  final encodedJson = dart_convert.jsonEncode(jsonString);
 
   // Calculate the message length
   final messageLength = encodedJson.length;
@@ -30,14 +29,16 @@ encodeMessage(jsonString) {
   final buffer = dart_buffer.Uint8List(4 + messageLength);
 
   // Write the message length as a 32-bit little endian integer
-  buffer.buffer.asByteData().setInt32(0, messageLength, dart_buffer.Endian.little);
+  buffer.buffer
+      .asByteData()
+      .setInt32(0, messageLength, dart_buffer.Endian.little);
 
   // Copy the encoded JSON into the buffer starting from the offset
-  buffer.setRange(4, buffer.length, encodedJson);
+  /* buffer.setRange(4, buffer.length, encodedJson.codeUnits); */// or simply do as follows:..
+  buffer.setAll(4, encodedJson.codeUnits);
 
   return buffer;
 }
-
 
 decodeMessage(buffer) {
   // Read message length with letting Dart VM itself to decide what Endian to use with respect tho host (most likely little endian)

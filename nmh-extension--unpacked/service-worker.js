@@ -3,7 +3,7 @@ chrome.action.onClicked.addListener((tab) => {
         'com.my_company.my_application',
         {text: 'Hello from Chrome'},
         function (response) {
-            console.log('Received ' + response);
+            console.log(response);
         }
     );
 });
