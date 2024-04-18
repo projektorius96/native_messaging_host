@@ -1,5 +1,12 @@
+import 'dart:io' as dart_io;
 import 'dart:convert' as dart_convert;
 import 'dart:typed_data' as dart_buffer;
+
+captureStdin(charCodesInt, {String outdir = 'main.log'}){
+  // Open the log file in write mode and create it if it doesn't exist
+  final sink = dart_io.File(outdir).openWrite(mode: dart_io.FileMode.append);
+  sink.write(String.fromCharCodes(charCodesInt));
+}
 
 encodeMessage(jsonString) {
   /// DEV_NOTE # Encode the JSON string to UTF-8
