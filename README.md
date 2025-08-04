@@ -1,4 +1,4 @@
-# Project name: native_messaging_host (NMH)
+# Project name: native_messaging_host (2025 ed.)
 
 > **NOTE**: The codebase is Windows-users oriented !
 
@@ -14,10 +14,11 @@
 
 ### Test the NMH
 
-1. Click on your extension icon pinned to your toolbar
+1. Click on your extension icon pinned to your browser's toolbar
 2. Open the extension service worker console and expect the following output as shown in Figure 1 below: 
 ![Figure 1](./nmh-extension--unpacked/output.png)
 3. Build something incredible with Dart and JavaScript (Chrome Extensions), respecting the stdio limitations as described per the [specification](https://developer.chrome.com/docs/extensions/develop/concepts/native-messaging#native-messaging-host)
+
 ---
 
 Made with ♥ by [projektorius96](https://github.com/projektorius96)

@@ -2,12 +2,16 @@ import 'dart:io' as dart_io;
 import 'dart:convert' as dart_convert;
 import 'dart:typed_data' as dart_buffer;
 
-captureStdin(charCodesInt, {String outdir = 'main.log'}){
+/// The `captureStdin` will capture stream and write to file as String 
+dart_io.IOSink captureStdin(List<int> charCodesInt, {String outdir = 'log.jsonl'}){
   // Open the log file in write mode and create it if it doesn't exist
   final sink = dart_io.File(outdir).openWrite(mode: dart_io.FileMode.append);
-  sink.write(String.fromCharCodes(charCodesInt));
+  sink.writeln(String.fromCharCodes(charCodesInt));
+
+  return sink;
 }
 
+/// Native Messaging Host encoding implementation, hence `encodeMessage`
 encodeMessage(jsonString) {
   /// DEV_NOTE # Encode the JSON string to UTF-8
   final encodedJson = dart_convert.jsonEncode(jsonString);
@@ -29,6 +33,7 @@ encodeMessage(jsonString) {
   return buffer;
 }
 
+/// Native Messaging Host decoding implementation, hence `decodeMessage`
 decodeMessage(buffer) {
   /// DEV_NOTE # Read message length via getInt32 view
   final messageLength =

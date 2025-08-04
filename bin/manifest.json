@@ -3,5 +3,5 @@
     "description": "Native messaging host built for Chromium-based browsers, powered by Dart",
     "path": "\\main.exe",
     "type": "stdio",
-    "allowed_origins": ["chrome-extension://bghbeldakemidgebaoaklbgciemgfoab/"]
+    "allowed_origins": ["chrome-extension://YOUR_EXTENSION_GENERATED_ID/"]
 }
