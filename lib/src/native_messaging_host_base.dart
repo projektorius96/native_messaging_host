@@ -2,58 +2,72 @@ import 'dart:io' as dart_io;
 import 'dart:convert' as dart_convert;
 import 'dart:typed_data' as typed_data;
 
-/// The `captureStdin` will capture stream and write to file as String 
-dart_io.IOSink captureStdin(List<int> charCodesInt, {String outdir = 'log.jsonl'}){
-  // Open the log file in write mode and create it if it doesn't exist
+/// Capture and write a readable JSON line to disk.
+/// If [framed] is true the first 4 bytes are treated as the 32-bit little-endian
+/// length prefix and will be stripped before decoding as UTF-8.
+dart_io.IOSink captureStdin(List<int> bytes,
+    {String outdir = 'log.jsonl', bool framed = false}) {
   final sink = dart_io.File(outdir).openWrite(mode: dart_io.FileMode.append);
-  sink.writeln(String.fromCharCodes(charCodesInt));
+
+  try {
+    List<int> payload = bytes;
+    if (framed && bytes.length > 4) {
+      payload = bytes.sublist(4); // strip 4-byte length prefix
+    }
+    final String text = dart_convert.utf8.decode(payload);
+    sink.writeln(text);
+  } catch (e) {
+    // If decoding fails, write a short binary marker and the byte length
+    sink.writeln('<<binary ${bytes.length} bytes>>');
+  }
 
   return sink;
 }
 
-/// Native Messaging Host encoding implementation, hence `encodeMessage`
-encodeMessage(data) {
-  
-  // Encodes the [data] as UTF-8 represented by `Uint8List` view. 
-  final typed_data.Uint8List encodedJson = dart_convert.utf8.encode(data);
+/// Native Messaging Host encoding implementation
+typed_data.Uint8List encodeMessage(dynamic data) {
+  // Convert the Dart object to JSON string, then to UTF-8 bytes
+  final String jsonString = dart_convert.jsonEncode(data);
+  final typed_data.Uint8List encodedJson =
+      typed_data.Uint8List.fromList(dart_convert.utf8.encode(jsonString));
 
-  // DEV_NOTE # Calculate the message length
-  final messageLength = encodedJson.length;
+  final int messageLength = encodedJson.length;
+  const int offset = 4;
+  final typed_data.Uint8List buffer = typed_data.Uint8List(offset + messageLength);
 
-  /// DEV_NOTE # Hard-coded offset equivalent to the length of the message
-  final offset = 4;
+  // Write 32-bit little-endian length prefix
+  buffer.buffer.asByteData().setInt32(0, messageLength, typed_data.Endian.little);
 
-  // DEV_NOTE # Allocate a buffer for the entire message (including the 32-bit prefix)
-  final buffer = typed_data.Uint8List(offset + messageLength);
-
-  // DEV_NOTE # Write the message length as a 32-bit little endian integer
-  buffer.buffer
-      .asByteData()
-      .setInt32(0, messageLength, typed_data.Endian.little);
-
-  // DEV_NOTE # Copy the encoded JSON into the buffer starting from the offset
-  buffer.setAll(offset, encodedJson.toString().codeUnits);
+  // Copy payload bytes directly
+  buffer.setRange(offset, offset + messageLength, encodedJson);
 
   return buffer;
-
 }
 
-/// Native Messaging Host decoding implementation, hence `decodeMessage`
-decodeMessage(data) {
+/// Native Messaging Host decoding implementation
+/// Expects a framed buffer (4-byte little-endian length prefix + payload).
+dynamic decodeMessage(typed_data.Uint8List data) {
+  if (data.length < 4) {
+    throw ArgumentError('Data too short to contain a 4-byte length prefix');
+  }
 
-  /// DEV_NOTE # Read message length via getInt32 view
-  final messageLength =
-      data.buffer.asByteData().getInt32(0, typed_data.Endian.host);
+  // Read 32-bit little-endian length
+  final int messageLength =
+      data.buffer.asByteData().getInt32(0, typed_data.Endian.little);
 
-  /// DEV_NOTE # Hard-coded offset equivalent to the length of the message
-  final offset = 4;
+  const int offset = 4;
+  final int end = offset + messageLength;
 
-  /// DEV_NOTE # Get the payload without the 32-bit prefix
-  final payload = data.sublist(offset, messageLength + offset);
+  if (data.length < end) {
+    throw ArgumentError(
+        'Incomplete payload: expected $messageLength bytes, have ${data.length - offset}');
+  }
 
-  /// DEV_NOTE # Decode the payload from UTF-8 to a String
-  final jsonString = dart_convert.jsonDecode(payload.toString());
+  final typed_data.Uint8List payload = data.sublist(offset, end);
 
-  return jsonString;
+  // Decode payload bytes as UTF-8 then parse JSON
+  final String jsonText = dart_convert.utf8.decode(payload);
+  final dynamic result = dart_convert.jsonDecode(jsonText);
 
+  return result;
 }

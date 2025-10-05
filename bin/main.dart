@@ -1,27 +1,38 @@
 import 'dart:io' as io;
-import 'dart:convert' as convert;
+import 'dart:typed_data' as typed_data;
 import 'package:native_messaging_host/native_messaging_host.dart';
 
 void main(List<String> arguments) {
 
   io.stdin.listen((data) async {
+    
+    // Decode the incoming message (data: Uint8List) to a Dart object (Map/List/primitive)
+    var decodedMessage = decodeMessage(typed_data.Uint8List.fromList(data));
 
-    List<dynamic> charCodes = decodeMessage(data);
-    List<int> charCodesInt = charCodes.cast<int>();
+    // Optionally log the decoded message
+    // captureStdin expects a List<int>, so if you want to log the raw bytes:
+    captureStdin(data, framed: true);
 
-    /// DEV_NOTE # Let's capture original messsage's value of ["text"] sent by [chrome.runtime.sendNativeMessage] to default [./main.log]
-    final capturedStdin = captureStdin(charCodesInt);
+    // If you want to log the decoded value as JSON:
+    // captureStdin(utf8.encode(jsonEncode(decodedMessage)));
+
+    // Mutate the message
+    if (decodedMessage is Map) {
+      decodedMessage["text"] = "Hello from Dart";
+    }
+
+    // Encode the message to send back
+    var encoded = encodeMessage(decodedMessage);
+
+    io.stdout.add(encoded);
+    await io.stdout.flush();
+
+    // Clean up on SIGINT
     io.ProcessSignal.sigint.watch().listen((signal) {
-      capturedStdin.close();
+      // If you opened a file handle, close it here
       io.exit(0);
     });
 
-    /// DEV_NOTE # Let's reuse a structure that carries a message, just alternating the ["text"] value, as follows:
-    Map decodedMessage = convert.jsonDecode(String.fromCharCodes(charCodesInt));
-        decodedMessage["text"] = "Hello from Dart";
-    io.stdout.add(encodeMessage(decodedMessage));
-    await io.stdout.flush();
-    
   });
 
 }
