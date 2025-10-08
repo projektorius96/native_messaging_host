@@ -1,27 +1,27 @@
-# Project name: native_messaging_host (2025 Q3 ed.)
+# Project name: native_messaging_host (2025 Q3 edition)
 
 > **NOTE**: The codebase is Windows-users oriented!
 
 ### Prerequisites
 
-- In order to set up the native messaging host (hereinafter - "NMH") on your local machine referring to [specification](https://developer.chrome.com/docs/extensions/develop/concepts/native-messaging#native-messaging-host) that describes how to implement that;
-- Load the extension on Chromium-based browser of choice (e.g. Chrome), the proof-of-case extension can be found under `./nmh-extension--unpacked/` path (directory);
+- In order to set up the native messaging host (hereinafter - "NMH") on your local machine referring to [specification](https://developer.chrome.com/docs/extensions/develop/concepts/native-messaging#native-messaging-host) that describes how to implement it;
+- Load the extension on Chromium-based browser of choice (e.g. Chrome), the proof-of-case extension can be found under `./nmh-extension--unpacked/` path (directory).
 
 ### Build your executable
 
 > Before running the command, it assumes your current working directory is `native_messaging_host` on your active terminal (_I use Git Bash for Windows, you may use complete WSL 2.0 or later_), then simply run <br>
 `dart compile exe ./bin/main.dart -o ./bin/main.exe`; _**NOTE**: you do not need to run it from the terminal, the extension itself will_ !
 
-### Test the NMH
+### Testing NMH
 
-1. Loead the unpacked extension, and click on your extension icon pinned to your browser's toolbar
-2. Open the extension service worker console and expect the following output as shown in Figure 1 below: 
+1. Load the unpacked extension, and click on your extension icon pinned to your browser's toolbar
+2. Open the extension service worker console and expect the following output as shown in **Figure 1**: 
 ![Figure 1](./nmh-extension--unpacked/output.png)
-3. Build something incredible with Dart and JavaScript (Chrome Extensions), respecting the stdio limitations as described per the [specification](https://developer.chrome.com/docs/extensions/develop/concepts/native-messaging#native-messaging-host).
+3. Build something incredible with Dart and JavaScript (Chrome Extensions), respecting the stdio limitations as described in the [specification](https://developer.chrome.com/docs/extensions/develop/concepts/native-messaging#native-messaging-host).
 
-### Remarks
+### Implementation remarks
 
-> I am not gonna lie, credits to GitHub Copilot for the guidance ❤️
+> I am not gonna lie, I got stuck at least once, credits to GitHub Copilot for the guidance ❤️
 
 Minimal robust algorithm (steps):
 
@@ -38,6 +38,10 @@ Minimal robust algorithm (steps):
   - Break and wait for more bytes to arrive (partial payload).
 4. Repeat on next chunk.
 
+### Milestones
+
+1. Write a test that temporarily would generate `./add_this_registry.reg` populating the '@=' with concrete value of the path, rather than something like `DISKVOLUME:\\PATH_TO_DART_PACKAGE_BIN_DIR\\manifest.json` as given in the initial project template; optionally, leverage [package:puppeteer](https://pub.dev/packages/puppeteer) package dependency by extracting currently tested NMH's "ID" value that would in turn replace `./bin/manifest.json` file's `YOUR_EXTENSION_GENERATED_ID` placeholder as given in the initial project template - this two-step testing process would reduce the significant amount of manual intervention by consumer or tester oneself, however for this proof-of-case scenario, it does a job as is...
+
 ---
 
-Made with ♥ by [projektorius96](https://github.com/projektorius96)
+Made with ♥ by [projektorius96](https://github.com/projektorius96) a.k.a. Lukas Gaučas

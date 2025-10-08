@@ -25,7 +25,8 @@ dart_io.IOSink captureStdin(List<int> bytes,
 }
 
 /// Native Messaging Host encoding implementation
-typed_data.Uint8List encodeMessage(dynamic data) {
+typed_data.Uint8List encodeMessage(Map<String, dynamic> data) {
+
   // Convert the Dart object to JSON string, then to UTF-8 bytes
   final String jsonString = dart_convert.jsonEncode(data);
   final typed_data.Uint8List encodedJson =
@@ -42,11 +43,12 @@ typed_data.Uint8List encodeMessage(dynamic data) {
   buffer.setRange(offset, offset + messageLength, encodedJson);
 
   return buffer;
+
 }
 
 /// Native Messaging Host decoding implementation
 /// Expects a framed buffer (4-byte little-endian length prefix + payload).
-dynamic decodeMessage(typed_data.Uint8List data) {
+Map<String, dynamic> decodeMessage(typed_data.Uint8List data) {
   if (data.length < 4) {
     throw ArgumentError('Data too short to contain a 4-byte length prefix');
   }
@@ -60,14 +62,15 @@ dynamic decodeMessage(typed_data.Uint8List data) {
 
   if (data.length < end) {
     throw ArgumentError(
-        'Incomplete payload: expected $messageLength bytes, have ${data.length - offset}');
+      'Incomplete payload: expected $messageLength bytes, have ${data.length - offset}'
+    );
   }
 
   final typed_data.Uint8List payload = data.sublist(offset, end);
 
   // Decode payload bytes as UTF-8 then parse JSON
   final String jsonText = dart_convert.utf8.decode(payload);
-  final dynamic result = dart_convert.jsonDecode(jsonText);
+  final Map<String, dynamic> result = dart_convert.jsonDecode(jsonText);
 
   return result;
 }
